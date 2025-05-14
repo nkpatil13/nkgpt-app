@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nk Chat Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Nk Chat Assistant</h1>
+        <div id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Type your message..." autofocus>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <script>
+        const input = document.getElementById("user-input");
+
+        function getTimestamp() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit',second:'2-digit' });
+        }
+
+        async function sendMessage() {
+            const message = input.value;
+            if (!message) return;
+
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class='user'>You (${getTimestamp()}): ${message}</div>`;
+
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message })
+            });
+
+            const data = await res.json();
+            chatBox.innerHTML += `<div class='bot'>Nk (${getTimestamp()}): ${data.response}</div>`;
+            input.value = "";
+            input.focus();
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        input.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        window.onload = () => input.focus();
+    </script>
+</body>
+</html>
